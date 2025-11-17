@@ -36,5 +36,38 @@ func main() {
 	}
 	fmt.Printf("Queue %v was created and bound\n", q.Name)
 
-	<-make(chan struct{})
+	gs := gamelogic.NewGameState(username)
+
+	for {
+		words := gamelogic.GetInput()
+		if len(words) == 0 {
+			continue
+		}
+
+		switch words[0] {
+		case "spawn":
+			err := gs.CommandSpawn(words)
+			if err != nil {
+				log.Printf("could't spawn unit")
+			}
+		case "move":
+			_, err := gs.CommandMove(words)
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Println("Units moved successfully")
+		case "status":
+			gs.CommandStatus()
+		case "help":
+			gamelogic.PrintClientHelp()
+		case "spam":
+			fmt.Println("Spamming not allowed yet!")
+		case "quit":
+			gamelogic.PrintQuit()
+			return
+		default:
+			fmt.Println("invalid command")
+			continue
+		}
+	}
 }
