@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rangaroo/learn-pub-sub-starter/internal/routing"
 	"github.com/rangaroo/learn-pub-sub-starter/internal/gamelogic"
@@ -22,6 +23,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could't create channel for the connection")
 	}
+
+	_, q, err := pubsub.DeclareAndBind(
+		conn,
+		routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		routing.GameLogSlug + ".*",
+		pubsub.QueueDurable,
+	)
+	if err != nil {
+		log.Fatalf("could't subscribe to pause: %w", err)
+	}
+	fmt.Printf("Queue %v was created and bound\n", q.Name)
 
 	gamelogic.PrintServerHelp()
 
