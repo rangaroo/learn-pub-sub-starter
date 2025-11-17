@@ -1,8 +1,6 @@
 package pubsub
 import (
-    "context"
-    "fmt"
-    "encoding/json"
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -43,16 +41,4 @@ func DeclareAndBind(
 	}
 
 	return channel, q, nil
-}
-
-func PublishJSON[T any](ch *amqp.Channel, exchange, key string, val T) error {
-    dat, err := json.Marshal(val)
-    if err != nil {
-        return fmt.Errorf("could't marshal 'val': %w", err)
-    }
-
-    return ch.PublishWithContext(context.Background(), exchange, key, false, false, amqp.Publishing{
-        ContentType: "application/json",
-        Body:        dat,
-	})
 }
