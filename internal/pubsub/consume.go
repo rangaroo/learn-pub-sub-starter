@@ -79,7 +79,9 @@ func DeclareAndBind(
 		queueType == QueueTransient,
 		queueType == QueueTransient,
 		false,
-		nil,
+		amqp.Table{
+		"x-dead-letter-exchange": "peril_dlx",
+		},
 	)
 	if err != nil {
 		return nil, amqp.Queue{}, fmt.Errorf("could't create new queue: %w", err)
