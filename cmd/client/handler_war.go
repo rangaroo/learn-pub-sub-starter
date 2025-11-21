@@ -12,6 +12,7 @@ import (
 func handlerWar(gs *gamelogic.GameState, publishChan *amqp.Channel) func(dw gamelogic.RecognitionOfWar) pubsub.Acktype {
 	return func(dw gamelogic.RecognitionOfWar) pubsub.Acktype {
 		defer fmt.Println("> ")
+        username := gs.GetUsername()
         outcome, winner, loser := gs.HandleWar(dw)
 		switch outcome {
         case gamelogic.WarOutcomeNotInvolved:
@@ -20,8 +21,8 @@ func handlerWar(gs *gamelogic.GameState, publishChan *amqp.Channel) func(dw game
             return pubsub.NackDiscard
         case gamelogic.WarOutcomeOpponentWon:
             err := publishGameLog(
-                gs,
                 publishChan,
+                username,
                 fmt.Sprintf("%s won a war against %s", winner, loser),
             )
             if err != nil {
@@ -31,8 +32,8 @@ func handlerWar(gs *gamelogic.GameState, publishChan *amqp.Channel) func(dw game
             return pubsub.Ack
         case gamelogic.WarOutcomeYouWon:
             err := publishGameLog(
-                gs,
                 publishChan,
+                username,
                 fmt.Sprintf("%s won a war against %s", winner, loser),
             )
             if err != nil {
@@ -42,8 +43,8 @@ func handlerWar(gs *gamelogic.GameState, publishChan *amqp.Channel) func(dw game
             return pubsub.Ack
         case gamelogic.WarOutcomeDraw:
             err := publishGameLog(
-                gs,
                 publishChan,
+                username,
                 fmt.Sprintf("A war between %s and %s resulted in a draw", winner, loser),
             )
             if err != nil {
