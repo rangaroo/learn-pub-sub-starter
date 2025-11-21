@@ -16,10 +16,14 @@ func handlerPause(gs *gamelogic.GameState) func(routing.PlayingState) pubsub.Ack
 	}
 }
 
-func handlerMove(gs *gamelogic.GameState, conn *amqp.Connection, publishChan *amqp.Channel) func (mv gamelogic.ArmyMove) pubsub.Acktype {
+func handlerMove(gs *gamelogic.GameState, publishChan *amqp.Channel) func (mv gamelogic.ArmyMove) pubsub.Acktype {
 	return func(mv gamelogic.ArmyMove) pubsub.Acktype {
 		defer fmt.Println("> ")
 		switch gs.HandleMove(mv) {
+		case gamelogic.MoveOutcomeSamePlayer:
+			return pubsub.Ack
+		case gamelogic.MoveOutComeSafe:
+			return pubsub.Ack
 		case gamelogic.MoveOutcomeMakeWar:
 			err := pubsub.PublishJSON(
 				publishChan,
@@ -32,9 +36,9 @@ func handlerMove(gs *gamelogic.GameState, conn *amqp.Connection, publishChan *am
 			)
 			if err != nil {
 				fmt.Printf("error: %s\n", err)
-				return pubsub.NackDiscard
+				return pubsub.NackRequeue
 			}
-			return pubsub.NackRequeue
+			return pubsub.Ack
 		default:
 			return pubsub.NackDiscard
 		}
