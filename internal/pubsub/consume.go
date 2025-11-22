@@ -20,6 +20,11 @@ func SubscribeGob[T any] (
 		return fmt.Errorf("could't declare and bind queue: %w", err)
 	}
 
+	err = c.Qos(10, 0, false)
+	if err != nil {
+		return fmt.Errorf("basic.qos: %v", err)
+	}
+
 	d, err := c.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("could't consume messages: %w", err)
@@ -60,6 +65,11 @@ func SubscribeJSON[T any](
 	c, q, err := DeclareAndBind(conn, exchange, queueName, key, queueType)
 	if err != nil {
 		return fmt.Errorf("could't declare and bind queue: %w", err)
+	}
+
+	err = c.Qos(10, 0, false)
+	if err != nil {
+		return fmt.Errorf("basic.qos: %v", err)
 	}
 
 	d, err := c.Consume(q.Name, "", false, false, false, false, nil)
